@@ -37,13 +37,13 @@ gcc -O3 soma.c -o soma -lpthread
 ## 📊 Resultados e Análise
 
 Executa usando o vetor padrão (1 bilhão de elementos) e 4 threads
-![Experimento 1](./images/exp1.png)
+![Experimento 1](./imagens/exp1.png)
 
 Executa definindo o tamanho do vetor (ex: 100 milhões) com 4 threads padrão
-![Experimento 2](./images/exp2.png)
+![Experimento 2](./imagens/exp2.png)
 
 Executa definindo 100 milhões de elementos e dividindo a carga para 8 threads
-![Experimento 3](./images/exp3.png)
+![Experimento 3](./imagens/exp3.png)
 
 **Gargalo de Memória (1 Bilhão de Elementos):** No teste com o tamanho máximo, registrou-se um tempo de sistema (sys) muito elevado. Isso ocorreu devido ao custo do sistema operacional para alocar e entregar dinamicamente as páginas de memória necessárias para o vetor global.  
 
