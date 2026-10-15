@@ -192,7 +192,7 @@ Ao aplicar essa **decomposição de dados**, multiplicamos a vazão de dados pro
 
 ---
 
-## 7. Quadro Resumo da Aula
+## 7. Resumo
 
 | Conceito | O que é? | Causa Raiz | Solução Adotada |
 | :--- | :--- | :--- | :--- |

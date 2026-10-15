@@ -175,7 +175,9 @@ Se o **Núcleo 0** altera a variável `A` na sua cache L1 local (usando *Write-B
 
 Esse desafio é resolvido pelo **Mecanismo de Coerência de Cache** (*Cache Coherence*) via hardware.
 
-*[Indicação de Imagem: Ilustração do protocolo MESI transicionando entre os estados M, E, S e I conforme comandos de leitura/escrita no barramento - Referência: "04_openmp.pdf" / "False sharing"]*
+*Ilustração do protocolo MESI transicionando entre os estados M, E, S e I conforme comandos de leitura/escrita no barramento*
+
+![Imagem4](./imagens/4.jfif)
 
 ### **O Protocolo MESI (O Padrão da Indústria)**
 
@@ -260,7 +262,7 @@ Em C, matrizes são armazenadas em ordem de linha (*Row-Major Order*).
 
 ---
 
-## 8. Resumo da Aula e Conexão com o Próximo Tópico
+## 8. Resumo
 
 - A **Hierarquia de Memória** (L1, L2, L3) existe para disfarçar a alta latência da RAM.
 - Os dados trafegam em **Linhas de Cache de 64 bytes**.
