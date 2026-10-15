@@ -1,6 +1,6 @@
 # O Gargalo de Von Neumann e a Necessidade do Paralelismo
 
-Aqui vamos entender por que a computação moderna foi "forçada" a se tornar paralela. Para programar sistemas distribuídos e paralelos de alta performance, o primeiro passo é compreender os limites físicos do hardware sequencial.
+Vamos entender por que a computação moderna foi "forçada" a se tornar paralela. Para programar sistemas distribuídos e paralelos de alta performance, o primeiro passo é compreender os limites físicos do hardware sequencial.
 
 ---
 
