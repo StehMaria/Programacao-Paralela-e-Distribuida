@@ -46,7 +46,7 @@ Proposta pelo matemático John von Neumann, essa arquitetura é a base de pratic
 
 *Diagrama clássico de blocos da Arquitetura Von Neumann mostrando a CPU contendo UC, ULA e Registradores conectados à Memória RAM por um barramento comum de dados e instruções.*
 
-![Imagem1](./imagens/1.png)
+![Imagem1](./imagens/1.jfif)
 
 
 ### Os Componentes Principais:
@@ -112,23 +112,6 @@ Como não era mais possível fazer **um único núcleo rodar mais rápido**, a i
 
 > **Em vez de 1 núcleo hiper-rápido a 10 GHz, colocamos 2, 4, 8, 16 ou 64 núcleos operando a frequências moderadas (2 a 3 GHz) no mesmo chip de silício.**
 
-```
-+-------------------------------------------------------------------+
-|                        PROCESSADOR MULTICORE                      |
-|  +--------------------+  +--------------------+  +-------------+  |
-|  | Núcleo 1 (Core 1)  |  | Núcleo 2 (Core 2)  |  | Núcleo N... |  |
-|  |  [UC] [ULA] [Regs] |  |  [UC] [ULA] [Regs] |  |             |  |
-|  |  Cache L1 / L2     |  |  Cache L1 / L2     |  |             |  |
-|  +--------------------+  +--------------------+  +-------------+  |
-|  +-------------------------------------------------------------+  |
-|  |                 Memória Cache L3 (Compartilhada)             |  |
-|  +-------------------------------------------------------------+  |
-+---------------------------------+---------------------------------+
-                                  | Barramento
-                    +-------------+-------------+
-                    |    Memória RAM Principal  |
-                    +---------------------------+
-```
 
 *Arquitetura Multicore mostrando múltiplos núcleos independentes com suas caches privadas L1/L2 e cache L3 compartilhada ligada à RAM.*
 

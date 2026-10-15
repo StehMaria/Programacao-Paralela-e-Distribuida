@@ -77,7 +77,9 @@ Dentro do chip do processador moderno (*socket*), a hierarquia de caches é divi
                       +--------------------------+
 ```
 
-*Diagrama mostrando a disposição dos níveis de cache L1, L2 dedicados a cada núcleo e L3 compartilhada em uma arquitetura multicore - Referência: "04_openmp.pdf" / "Multicore Computing Algorithms Architecture"*
+*Diagrama mostrando a disposição dos níveis de cache L1, L2 dedicados a cada núcleo e L3 compartilhada em uma arquitetura multicore*
+
+![Imagem2.1](./imagens/2.1.jfif)
 
 ### **A. Cache L1 (Level 1)**
 - **Localização:** Integrada internamente dentro de cada núcleo físico (*core*).
