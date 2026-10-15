@@ -1,0 +1,207 @@
+# Aula 3.4: Processamento Vetorial (SIMD) — SSE, AVX, AVX-512 e Registradores Estendidos
+
+## 1. Visão Geral e Objetivo
+Até agora, estudamos como otimizar o acesso à memória e reestruturar laços de repetição. Nesta aula, vamos mergulhar na **vetorização no nível do processador**. 
+
+Com o **Processamento Vetorial (SIMD - *Single Instruction, Multiple Data*)**, um único núcleo da CPU executa uma única instrução capaz de processar **múltiplos elementos de dados simultaneamente**, utilizando registradores estendidos especiais.
+
+Ao final desta aula, você entenderá a evolução das extensões x86 (MMX, SSE, AVX e AVX-512), a anatomia dos registradores estendidos, como escrever e interpretar códigos usando *Intrinsics* do C/C++ e as boas práticas para evitar penalidades de desempenho.
+
+---
+
+## 2. O Conceito Fundamental de SIMD: Escalar vs. Vetorial
+
+### A Analogia da Esteira de Embalagem
+Imagine uma fábrica de sucos:
+* **Processamento Escalar (Tradicional):** Um funcionário pega **1 garrafa por vez**, coloca uma tampa, aperta e passa para a caixa. Se houver 8 garrafas, ele repete o movimento 8 vezes consecutivas.
+* **Processamento Vetorial (SIMD):** O funcionário utiliza uma **prensa especial de 8 cabeças**. Ele posiciona 8 garrafas de uma só vez, baixa a alavanca uma única vez e tampa as 8 garrafas no mesmo ciclo de trabalho.
+
+```
+----------------------------------------------------------------------------------
+EXECUÇÃO ESCALAR (1 Dado por Instrução)
+Instrução 1: [ A[0] + B[0] -> C[0] ]  (Ciclo 1)
+Instrução 2: [ A[1] + B[1] -> C[1] ]  (Ciclo 2)
+Instrução 3: [ A[2] + B[2] -> C[2] ]  (Ciclo 3)
+Instrução 4: [ A[3] + B[3] -> C[3] ]  (Ciclo 4)
+
+EXECUÇÃO VETORIAL / SIMD (4 Dados por Instrução com SSE - 128 bits)
+Instrução 1: [ A[0..3] + B[0..3] -> C[0..3] ]  (Ciclo 1 Único!)
+----------------------------------------------------------------------------------
+```
+
+---
+
+## 3. Evolução das Extensões SIMD na Arquitetura x86
+
+Para permitir que uma única instrução opere sobre múltiplos dados, os engenheiros de hardware adicionaram **Registradores Estendidos** dentro de cada núcleo da CPU.
+
+```
+DIAGRAMA DE REGISTRADORES ESTENDIDOS (Tamanho das Unidades de Vetor)
+
+MMX (64 bits)   : [ 64 bits ] (8x int8 ou 2x int32)
+SSE (128 bits)  : [ XMM0                                ] (4x float32 ou 2x float64)
+AVX (256 bits)  : [ YMM0 (Superconjunto do XMM0)       ] (8x float32 ou 4x float64)
+AVX-512 (512b)  : [ ZMM0 (Superconjunto do YMM0)                      ] (16x float32 ou 8x float64)
+```
+
+### 1. MMX (1996)
+* **Registradores:** 64 bits (`MM0` a `MM7`).
+* **Características:** Introduzido na era Pentium. Suportava apenas inteiros e reutilizava os registradores de Ponto Flutuante (FPU), impedindo o uso simultâneo de operações de ponto flutuante.
+
+### 2. SSE (*Streaming SIMD Extensions*) (1999+)
+* **Registradores:** 128 bits (`XMM0` a `XMM15`).
+* **Capacidade:**
+  * 4 valores `float` (32 bits cada)
+  * 2 valores `double` (64 bits cada)
+  * 4 inteiros `int` (32 bits cada)
+* **Marcos:** Adicionou suporte a ponto flutuante em registradores dedicados e evoluiu até SSE4.2.
+
+### 3. AVX e AVX2 (*Advanced Vector Extensions*) (2011/2013)
+* **Registradores:** 256 bits (`YMM0` a `YMM15` ou `YMM32` em 64-bit).
+* **Capacidade:**
+  * **8 valores `float` de 32 bits**
+  * **4 valores `double` de 64 bits**
+  * **8 inteiros `int32`**
+* **Inovações:**
+  * Sintaxe de 3 operandos (`C = A + B`), preservando os dados de entrada sem sobrescrevê-los.
+  * Suporte a instruções **FMA (*Fused Multiply-Add*)**, calculando $A \times B + C$ em uma única instrução de relógio com alta precisão.
+
+### 4. AVX-512 (2016+)
+* **Registradores:** 512 bits (`ZMM0` a `ZMM31`).
+* **Capacidade:**
+  * **16 valores `float` de 32 bits** ou **8 valores `double` de 64 bits** por ciclo!
+* **Inovações:**
+  * **Registradores de Máscara (`k0` a `k7`):** Permitem execução condicional vetorizada (equivalente a `if/else` dentro de vetores sem quebrar o paralelismo).
+  * Usado intensivamente em Supercomputadores e Processadores de Servidor (Intel Xeon).
+
+---
+
+## 4. Trabalhando com SIMD em C/C++: Intrinsics
+
+Para programar em SIMD sem precisar escrever Assembly puramente manual, compiladores (GCC, Clang, MSVC) fornecem **Intrinsics**: funções especiais em C que se traduzem diretamente em instruções Assembly de vetor.
+
+### Convenção de Nomenclatura das Intrinsics da Intel
+
+Toda função *intrinsic* do AVX/AVX2 segue um padrão claro:
+
+$$\text{\_mm256\_[operação]\_[tipo]}$$
+
+* **Prefixo de Registrador:**
+  * `_mm_`: opera em registradores de 128 bits (SSE / XMM).
+  * `_mm256_`: opera em registradores de 256 bits (AVX / YMM).
+  * `_mm512_`: opera em registradores de 512 bits (AVX-512 / ZMM).
+* **Operação:** `add`, `sub`, `mul`, `div`, `fmadd`, `load`, `store`.
+* **Sufixo de Tipo de Dado:**
+  * `ps`: *Packed Single* (Vetor de `float` 32-bit).
+  * `pd`: *Packed Double* (Vetor de `double` 64-bit).
+  * `epi32`: *Extended Packed Integer 32-bit* (Vetor de `int` 32-bit).
+
+---
+
+## 5. Exemplo Prático em C: Soma de Vetores Escalar vs. AVX2 (256 bits)
+
+O código abaixo ilustra como somar dois vetores de 10 milhões de elementos do tipo `float`. A versão AVX2 processa **8 floats por instrução**.
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <immintrin.h> // Cabeçalho obrigatório para intrinsics AVX/SSE
+#include <time.h>
+
+#define N 10000000 // 10 Milhões de elementos
+
+// 1. Versão Escalar Tradicional
+void soma_escalar(float *a, float *b, float *c, int n) {
+    for (int i = 0; i < n; i++) {
+        c[i] = a[i] + b[i];
+    }
+}
+
+// 2. Versão Vetorizada com AVX2 (Intrinsics)
+void soma_avx2(float *a, float *b, float *c, int n) {
+    int i = 0;
+    
+    // Passo de 8 em 8 elementos (256 bits / 32 bits por float = 8 floats)
+    for (; i <= n - 8; i += 8) {
+        // Carrega 8 floats do vetor 'a' e 8 floats do vetor 'b'
+        __m256 vec_a = _mm256_loadu_ps(&a[i]);
+        __m256 vec_b = _mm256_loadu_ps(&b[i]);
+        
+        // Executa a soma vetorial simultânea de 8 elementos
+        __m256 vec_c = _mm256_add_ps(vec_a, vec_b);
+        
+        // Descarrega o registrador de volta na memória 'c'
+        _mm256_storeu_ps(&c[i], vec_c);
+    }
+    
+    // Laço de Resto (Tail Loop): trata os elementos remanescentes
+    for (; i < n; i++) {
+        c[i] = a[i] + b[i];
+    }
+}
+
+int main() {
+    // Alocação de memória alinhada em 32 bytes (256 bits) para melhor desempenho
+    float *a = (float *)aligned_alloc(32, N * sizeof(float));
+    float *b = (float *)aligned_alloc(32, N * sizeof(float));
+    float *c = (float *)aligned_alloc(32, N * sizeof(float));
+
+    for (int i = 0; i < N; i++) {
+        a[i] = 1.0f;
+        b[i] = 2.0f;
+    }
+
+    clock_t start = clock();
+    soma_escalar(a, b, c, N);
+    clock_t end = clock();
+    printf("Tempo Escalar: %.4f segundos\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+    start = clock();
+    soma_avx2(a, b, c, N);
+    end = clock();
+    printf("Tempo AVX2   : %.4f segundos\n", (double)(end - start) / CLOCKS_PER_SEC);
+
+    free(a); free(b); free(c);
+    return 0;
+}
+```
+
+> **Para compilar no Linux com GCC:**
+> ```bash
+> gcc -O2 -mavx2 soma_simd.c -o soma_simd
+> ./soma_simd
+> ```
+
+---
+
+## 6. Cuidados Essenciais e Penalidades no Uso de SIMD
+
+### 1. Alinhamento de Memória (*Aligned vs. Unaligned*)
+* Usar `_mm256_load_ps` exige que o endereço de memória esteja alinhado em **32 bytes** (256 bits). Se não estiver, o programa gera uma falha de segmentação (*Segmentation Fault*).
+* `_mm256_loadu_ps` funciona com dados não alinhados (`u` = *unaligned*), mas pode sofrer uma pequena penalidade de latência em arquiteturas antigas.
+
+### 2. Tratamento de Restos (*Tail Loops*)
+Se o tamanho do vetor não for um múltiplo exato da largura do registrador (ex: 1.000.003 elementos divididos em blocos de 8), o laço principal processa os primeiros 1.000.000 elementos, e os 3 elementos restantes devem ser processados por um laço escalar tradicional de limpeza.
+
+### 3. Divergência de Controle e Ramificações (`if/else`)
+O hardware SIMD não possui múltiplos apontadores de instrução (*Program Counters*). Se houver um `if` dentro de um laço vetorizado, a CPU precisa calcular ambos os caminhos ou usar máscaras de bits (`_mm256_blendv_ps`), o que diminui o ganho do paralelismo.
+
+---
+
+## 7. Resumo Comparativo das Extensões SIMD
+
+| Extensão | Ano | Tam. Registrador | Floats (32-bit) / Ciclo | Doubles (64-bit) / Ciclo | Registradores |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **MMX** | 1996 | 64 bits | 0 (Apenas Int) | 0 | `MM0`–`MM7` |
+| **SSE4.2** | 2009 | 128 bits | 4 | 2 | `XMM0`–`XMM15` |
+| **AVX2** | 2013 | 256 bits | **8** | **4** | `YMM0`–`YMM15/32` |
+| **AVX-512** | 2016 | 512 bits | **16** | **8** | `ZMM0`–`ZMM31` |
+
+---
+
+## 8. Exercícios de Fixação
+
+1. Quantos elementos do tipo `double` (64 bits) cabem em um único registrador `YMM` da extensão AVX2 (256 bits)?
+2. Qual a função da operação `FMA` (*Fused Multiply-Add*) e qual a sua vantagem em relação a executar uma multiplicação seguida de uma adição separadas?
+3. O que acontece se utilizarmos a instrução `_mm256_load_ps` em um ponteiro que não foi alinhado em uma fronteira de 32 bytes na memória RAM?
+4. Por que o código SIMD precisa de um laço de resto (*tail loop*) ao final do laço principal de processamento vetorial?
